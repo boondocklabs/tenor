@@ -1,0 +1,316 @@
+// Verilated -*- C++ -*-
+// DESCRIPTION: Verilator output: Design internal header
+// See Vsim.h for the primary calling header
+
+#ifndef VERILATED_VSIM_SIM_H_
+#define VERILATED_VSIM_SIM_H_  // guard
+
+#include "verilated.h"
+
+class Vsim__Syms;
+class Vsim_VexRiscv;
+
+VL_MODULE(Vsim_sim) {
+  public:
+    // CELLS
+    Vsim_VexRiscv* VexRiscv;
+
+    // DESIGN SPECIFIC STATE
+    // Anonymous structures to workaround compiler member-count bugs
+    struct {
+        VL_OUT8(__PVT__sim_trace,0,0);
+        VL_IN8(sys_clk,0,0);
+        VL_OUT8(serial_source_valid,0,0);
+        VL_IN8(serial_source_ready,0,0);
+        VL_OUT8(serial_source_data,7,0);
+        VL_IN8(serial_sink_valid,0,0);
+        VL_OUT8(serial_sink_ready,0,0);
+        VL_IN8(serial_sink_data,7,0);
+        CData/*0:0*/ __PVT__main_int_rst;
+        CData/*0:0*/ __PVT__main_soc_rst;
+        CData/*1:0*/ __PVT__main_reset_storage;
+        CData/*0:0*/ __PVT__main_reset_re;
+        CData/*0:0*/ __PVT__main_scratch_re;
+        CData/*0:0*/ __PVT__main_bus_errors_re;
+        CData/*0:0*/ __PVT__main_ibus_ack;
+        CData/*0:0*/ __PVT__main_dbus_ack;
+        CData/*0:0*/ __PVT__main_simsoc_ram_bus_ack;
+        CData/*0:0*/ __PVT__main_ram_bus_ram_bus_cyc;
+        CData/*0:0*/ __PVT__main_ram_bus_ram_bus_ack;
+        CData/*3:0*/ __PVT__main_ram_we;
+        CData/*0:0*/ __PVT__main_uart_rxtx_re;
+        CData/*0:0*/ __PVT__main_uart_rxtx_we;
+        CData/*0:0*/ __PVT__main_uart_txfull_re;
+        CData/*0:0*/ __PVT__main_uart_rxempty_re;
+        CData/*0:0*/ __PVT__main_uart_tx_pending;
+        CData/*0:0*/ __PVT__main_uart_tx_clear;
+        CData/*0:0*/ __PVT__main_uart_tx_trigger_d;
+        CData/*0:0*/ __PVT__main_uart_rx_pending;
+        CData/*0:0*/ __PVT__main_uart_rx_clear;
+        CData/*0:0*/ __PVT__main_uart_rx_trigger_d;
+        CData/*1:0*/ __PVT__main_uart_status_status;
+        CData/*0:0*/ __PVT__main_uart_status_re;
+        CData/*1:0*/ __PVT__main_uart_pending_status;
+        CData/*0:0*/ __PVT__main_uart_pending_re;
+        CData/*1:0*/ __PVT__main_uart_pending_r;
+        CData/*1:0*/ __PVT__main_uart_enable_storage;
+        CData/*0:0*/ __PVT__main_uart_enable_re;
+        CData/*0:0*/ __PVT__main_uart_txempty_re;
+        CData/*0:0*/ __PVT__main_uart_rxfull_re;
+        CData/*0:0*/ __PVT__main_uart_tx_fifo_readable;
+        CData/*0:0*/ __PVT__main_uart_tx_fifo_syncfifo_writable;
+        CData/*0:0*/ __PVT__main_uart_tx_fifo_syncfifo_re;
+        CData/*4:0*/ __PVT__main_uart_tx_fifo_level0;
+        CData/*3:0*/ __PVT__main_uart_tx_fifo_produce;
+        CData/*3:0*/ __PVT__main_uart_tx_fifo_consume;
+        CData/*3:0*/ __PVT__main_uart_tx_fifo_wrport_adr;
+        CData/*0:0*/ __PVT__main_uart_tx_fifo_do_read;
+        CData/*7:0*/ __PVT__main_uart_tx_fifo_fifo_out_payload_data;
+        CData/*0:0*/ __PVT__main_uart_tx_fifo_fifo_out_first;
+        CData/*0:0*/ __PVT__main_uart_tx_fifo_fifo_out_last;
+        CData/*0:0*/ __PVT__main_uart_rx_fifo_readable;
+        CData/*0:0*/ __PVT__main_uart_rx_fifo_syncfifo_writable;
+        CData/*0:0*/ __PVT__main_uart_rx_fifo_syncfifo_re;
+        CData/*4:0*/ __PVT__main_uart_rx_fifo_level0;
+        CData/*3:0*/ __PVT__main_uart_rx_fifo_produce;
+        CData/*3:0*/ __PVT__main_uart_rx_fifo_consume;
+        CData/*3:0*/ __PVT__main_uart_rx_fifo_wrport_adr;
+        CData/*0:0*/ __PVT__main_uart_rx_fifo_do_read;
+        CData/*7:0*/ __PVT__main_uart_rx_fifo_fifo_out_payload_data;
+        CData/*0:0*/ __PVT__main_uart_rx_fifo_fifo_out_first;
+        CData/*0:0*/ __PVT__main_uart_rx_fifo_fifo_out_last;
+        CData/*0:0*/ __PVT__main_timer_load_re;
+        CData/*0:0*/ __PVT__main_timer_reload_re;
+        CData/*0:0*/ __PVT__main_timer_en_storage;
+    };
+    struct {
+        CData/*0:0*/ __PVT__main_timer_en_re;
+        CData/*0:0*/ __PVT__main_timer_update_value_storage;
+        CData/*0:0*/ __PVT__main_timer_update_value_re;
+        CData/*0:0*/ __PVT__main_timer_value_re;
+        CData/*0:0*/ __PVT__main_timer_zero_pending;
+        CData/*0:0*/ __PVT__main_timer_zero_clear;
+        CData/*0:0*/ __PVT__main_timer_zero_trigger_d;
+        CData/*0:0*/ __PVT__main_timer_status_re;
+        CData/*0:0*/ __PVT__main_timer_pending_re;
+        CData/*0:0*/ __PVT__main_timer_pending_r;
+        CData/*0:0*/ __PVT__main_timer_enable_storage;
+        CData/*0:0*/ __PVT__main_timer_enable_re;
+        CData/*3:0*/ __PVT__main_bus_sel;
+        CData/*0:0*/ __PVT__main_bus_cyc;
+        CData/*0:0*/ __PVT__main_bus_stb;
+        CData/*0:0*/ __PVT__main_bus_ack;
+        CData/*0:0*/ __PVT__main_bus_we;
+        CData/*0:0*/ __PVT__main_core_sink_ready;
+        CData/*0:0*/ __PVT__main_core_source_valid;
+        CData/*0:0*/ __PVT__main_dma_reader_sink_ready;
+        CData/*0:0*/ __PVT__main_dma_reader_source_valid;
+        CData/*0:0*/ __PVT__main_dma_reader_source_last;
+        CData/*0:0*/ __PVT__main_status_re;
+        CData/*1:0*/ __PVT__main_control_storage;
+        CData/*0:0*/ __PVT__main_control_re;
+        CData/*0:0*/ __PVT__main_instruction_re;
+        CData/*0:0*/ __PVT__main_src_re;
+        CData/*0:0*/ __PVT__main_dst_re;
+        CData/*0:0*/ __PVT__main_length_re;
+        CData/*0:0*/ __PVT__main_enable_storage;
+        CData/*0:0*/ __PVT__main_enable_re;
+        CData/*0:0*/ __PVT__main_input_re;
+        CData/*0:0*/ __PVT__main_output_re;
+        CData/*0:0*/ __PVT__main_imm_re;
+        CData/*0:0*/ __PVT__main_done_status;
+        CData/*0:0*/ __PVT__main_done_re;
+        CData/*0:0*/ __PVT__main_offset_re;
+        CData/*0:0*/ __PVT__main_tick_re;
+        CData/*0:0*/ __PVT__main_data_re;
+        CData/*0:0*/ __PVT__builder_simsoc_we;
+        CData/*0:0*/ __PVT__builder_simsoc_wishbone_cyc;
+        CData/*0:0*/ __PVT__builder_simsoc_wishbone_ack;
+        CData/*0:0*/ __PVT__builder_shared_ack;
+        CData/*2:0*/ __PVT__builder_request;
+        CData/*1:0*/ __PVT__builder_grant;
+        CData/*2:0*/ __PVT__builder_slave_sel;
+        CData/*2:0*/ __PVT__builder_slave_sel_r;
+        CData/*0:0*/ __PVT__builder_error;
+        CData/*0:0*/ __PVT__builder_done;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_status_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_status_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_control0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_control0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_instruction0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_instruction0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_src0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_src0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_dst0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_dst0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_length0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_length0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_enable0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_enable0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_input0_re;
+    };
+    struct {
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_input0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_output0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_output0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_imm0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_imm0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_done_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_done_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_offset_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_offset_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_tick_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_tick_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_data_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank0_data_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank1_reset0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank1_reset0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank1_scratch0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank1_scratch0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank1_bus_errors_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank1_bus_errors_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_sel_r;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_load0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_load0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_reload0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_reload0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_en0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_en0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_update_value0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_update_value0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_value_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_value_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_ev_status_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_ev_status_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_ev_pending_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_ev_pending_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_ev_enable0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank2_ev_enable0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_txfull_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_txfull_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_rxempty_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_rxempty_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_ev_status_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_ev_status_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_ev_pending_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_ev_pending_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_ev_enable0_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_ev_enable0_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_txempty_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_txempty_we;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_rxfull_re;
+        CData/*0:0*/ __PVT__builder_csr_bankarray_csrbank3_rxfull_we;
+        CData/*0:0*/ __PVT__builder_simsoc_wishbonedmareader_state;
+        CData/*0:0*/ __PVT__builder_simsoc_wishbonedmareader_next_state;
+        CData/*0:0*/ __PVT__main_dma_reader_data_wishbonedmareader_next_value_ce;
+        CData/*1:0*/ __PVT__builder_simsoc_resetinserter_state;
+        CData/*1:0*/ __PVT__builder_simsoc_resetinserter_next_state;
+        CData/*0:0*/ __PVT__main_offset_resetinserter_next_value_ce;
+        CData/*0:0*/ __PVT__builder_simsoc_state;
+        CData/*0:0*/ __PVT__builder_simsoc_next_state;
+        CData/*3:0*/ __PVT__builder_array_muxed2;
+        CData/*0:0*/ __PVT__builder_array_muxed3;
+        CData/*0:0*/ __PVT__builder_array_muxed4;
+        CData/*0:0*/ __PVT__builder_array_muxed5;
+        CData/*2:0*/ __PVT__builder_array_muxed6;
+        CData/*1:0*/ __PVT__builder_array_muxed7;
+    };
+    struct {
+        CData/*5:0*/ __PVT__mem_adr0;
+        CData/*0:0*/ __Vcellinp__VexRiscv__reset;
+        CData/*4:0*/ __Vdly__main_uart_rx_fifo_level0;
+        CData/*1:0*/ __Vdly__builder_grant;
+        CData/*0:0*/ __Vdly__main_simsoc_ram_bus_ack;
+        CData/*3:0*/ __Vdly__main_uart_tx_fifo_consume;
+        CData/*0:0*/ __Vdly__main_ram_bus_ram_bus_ack;
+        CData/*4:0*/ __Vdly__main_uart_tx_fifo_level0;
+        CData/*3:0*/ __Vdly__main_uart_rx_fifo_consume;
+        CData/*4:0*/ __Vdlyvlsb__sram__v0;
+        CData/*7:0*/ __Vdlyvval__sram__v0;
+        CData/*0:0*/ __Vdlyvset__sram__v0;
+        CData/*4:0*/ __Vdlyvlsb__sram__v1;
+        CData/*7:0*/ __Vdlyvval__sram__v1;
+        CData/*0:0*/ __Vdlyvset__sram__v1;
+        CData/*4:0*/ __Vdlyvlsb__sram__v2;
+        CData/*7:0*/ __Vdlyvval__sram__v2;
+        CData/*0:0*/ __Vdlyvset__sram__v2;
+        CData/*4:0*/ __Vdlyvlsb__sram__v3;
+        CData/*7:0*/ __Vdlyvval__sram__v3;
+        CData/*0:0*/ __Vdlyvset__sram__v3;
+        CData/*3:0*/ __Vdlyvdim0__storage__v0;
+        CData/*0:0*/ __Vdlyvset__storage__v0;
+        CData/*3:0*/ __Vdlyvdim0__storage_1__v0;
+        CData/*0:0*/ __Vdlyvset__storage_1__v0;
+        SData/*13:0*/ __PVT__builder_simsoc_adr;
+        SData/*10:0*/ __PVT__sram_adr0;
+        SData/*9:0*/ __PVT__storage_dat0;
+        SData/*9:0*/ __PVT__storage_dat1;
+        SData/*9:0*/ __PVT__storage_1_dat0;
+        SData/*9:0*/ __PVT__storage_1_dat1;
+        SData/*10:0*/ __Vdlyvdim0__sram__v0;
+        SData/*10:0*/ __Vdlyvdim0__sram__v1;
+        SData/*10:0*/ __Vdlyvdim0__sram__v2;
+        SData/*10:0*/ __Vdlyvdim0__sram__v3;
+        SData/*9:0*/ __Vdlyvval__storage__v0;
+        SData/*9:0*/ __Vdlyvval__storage_1__v0;
+        IData/*31:0*/ __PVT__main_scratch_storage;
+        IData/*31:0*/ __PVT__main_bus_errors;
+        IData/*31:0*/ __PVT__main_interrupt;
+        IData/*31:0*/ __PVT__main_timer_load_storage;
+        IData/*31:0*/ __PVT__main_timer_reload_storage;
+        IData/*31:0*/ __PVT__main_timer_value_status;
+        IData/*31:0*/ __PVT__main_timer_value;
+        IData/*31:0*/ __PVT__main_bus_adr;
+        IData/*31:0*/ __PVT__main_core_source_payload_data;
+        IData/*31:0*/ __PVT__main_core_data;
+        IData/*31:0*/ __PVT__main_core_counter;
+        IData/*31:0*/ __PVT__main_dma_reader_source_payload_data;
+        IData/*31:0*/ __PVT__main_dma_reader_data;
+        IData/*31:0*/ __PVT__main_instruction_storage;
+        IData/*31:0*/ __PVT__main_src_storage;
+        IData/*31:0*/ __PVT__main_dst_storage;
+        IData/*31:0*/ __PVT__main_length_storage;
+        IData/*31:0*/ __PVT__main_input_storage;
+        IData/*31:0*/ __PVT__main_output_storage;
+        IData/*31:0*/ __PVT__main_imm_storage;
+        IData/*31:0*/ __PVT__main_offset;
+        IData/*31:0*/ __PVT__builder_simsoc_dat_w;
+        IData/*31:0*/ __PVT__builder_simsoc_wishbone_dat_r;
+        IData/*31:0*/ __PVT__builder_shared_dat_r;
+        IData/*19:0*/ __PVT__builder_count;
+        IData/*31:0*/ __PVT__builder_csr_bankarray_interface0_bank_bus_dat_r;
+        IData/*31:0*/ __PVT__builder_csr_bankarray_interface1_bank_bus_dat_r;
+    };
+    struct {
+        IData/*31:0*/ __PVT__builder_csr_bankarray_sram_bus_dat_r;
+        IData/*31:0*/ __PVT__builder_csr_bankarray_interface2_bank_bus_dat_r;
+        IData/*31:0*/ __PVT__builder_csr_bankarray_interface3_bank_bus_dat_r;
+        IData/*31:0*/ __PVT__main_dma_reader_data_wishbonedmareader_next_value;
+        IData/*31:0*/ __PVT__main_offset_resetinserter_next_value;
+        IData/*31:0*/ __PVT__builder_array_muxed0;
+        IData/*31:0*/ __PVT__builder_array_muxed1;
+        IData/*31:0*/ __PVT__rom_dat0;
+        IData/*31:0*/ __Vdly__main_bus_errors;
+        IData/*31:0*/ __Vdly__main_core_counter;
+        IData/*31:0*/ __Vdly__main_timer_value;
+        VlUnpacked<IData/*31:0*/, 5854> __PVT__rom;
+        VlUnpacked<IData/*31:0*/, 2048> __PVT__sram;
+        VlUnpacked<CData/*7:0*/, 37> __PVT__mem;
+        VlUnpacked<SData/*9:0*/, 16> __PVT__storage;
+        VlUnpacked<SData/*9:0*/, 16> __PVT__storage_1;
+    };
+
+    // INTERNAL VARIABLES
+    Vsim__Syms* const vlSymsp;
+
+    // CONSTRUCTORS
+    Vsim_sim(Vsim__Syms* symsp, const char* name);
+    ~Vsim_sim();
+    VL_UNCOPYABLE(Vsim_sim);
+
+    // INTERNAL METHODS
+    void __Vconfigure(bool first);
+} VL_ATTR_ALIGNED(VL_CACHE_LINE_BYTES);
+
+
+#endif  // guard

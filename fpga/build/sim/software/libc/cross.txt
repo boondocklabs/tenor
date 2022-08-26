@@ -1,0 +1,16 @@
+[binaries]
+c     = 'riscv64-unknown-elf-gcc'
+ar    = 'riscv64-unknown-elf-gcc-ar'
+as    = 'riscv64-unknown-elf-as'
+nm    = 'riscv64-unknown-elf-gcc-nm'
+strip = 'riscv64-unknown-elf-strip'
+
+[host_machine]
+system     = 'unknown'
+cpu_family = 'riscv'
+cpu        = 'vexriscv'
+endian     = 'little'
+
+[built-in options]
+c_args      = [ '-Os', '-march=rv32i2p0_m', '-mabi=ilp32', '-D__vexriscv__', '-g3', '-fomit-frame-pointer', '-Wall', '-fno-builtin', '-fno-stack-protector', '-I/Users/fuzz/litex/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/tinystdio', '-I/Users/fuzz/litex/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include', '-I/Users/fuzz/litex/litex/litex/soc/software/libbase', '-I/Users/fuzz/litex/litex/litex/soc/software/include', '-I/Users/fuzz/litex/litex/litex/soc/software', '-I/Users/fuzz/riscv/fpga/build/sim/software/include', '-I/Users/fuzz/riscv/fpga/build/sim/software/include/../libc', '-I/Users/fuzz/litex/litex/litex/soc/cores/cpu/vexriscv', '-fexceptions', '-Wpragmas', ]
+c_link_args = [ '-nostdlib', '-nodefaultlibs', '-Wl,--no-dynamic-linker', '-Wl,--build-id=none', '-MD', '-MP', '-Os', '-march=rv32i2p0_m', '-mabi=ilp32', '-D__vexriscv__', '-g3', '-fomit-frame-pointer', '-Wall', '-fno-builtin', '-fno-stack-protector', '-I/Users/fuzz/litex/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/tinystdio', '-I/Users/fuzz/litex/pythondata-software-picolibc/pythondata_software_picolibc/data/newlib/libc/include', '-I/Users/fuzz/litex/litex/litex/soc/software/libbase', '-I/Users/fuzz/litex/litex/litex/soc/software/include', '-I/Users/fuzz/litex/litex/litex/soc/software', '-I/Users/fuzz/riscv/fpga/build/sim/software/include', '-I/Users/fuzz/riscv/fpga/build/sim/software/include/../libc', '-I/Users/fuzz/litex/litex/litex/soc/cores/cpu/vexriscv', '-fexceptions', '-Wpragmas', '-L/Users/fuzz/riscv/fpga/build/sim/software/include', ]
