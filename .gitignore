@@ -1,2 +1,4 @@
 /target
 /build
+kernel.bin
+litex-pac/svd/soc.svd
