@@ -206,6 +206,13 @@ def main():
         soc.finalize()
 
         svd_file = "soc.svd"
+
+        from pathlib import Path
+        svd_path = os.path.join(os.getcwd(), "litex-pac/svd/")
+        os.makedirs(svd_path, exist_ok=True)
+        svd_abspath = os.path.join(os.getcwd(), "litex-pac/svd/", svd_file)
+        Path(svd_abspath).touch(exist_ok=True)
+
         generate_svd(soc, "litex-pac/svd", filename=svd_file)
 
         os.chdir("litex-pac")
