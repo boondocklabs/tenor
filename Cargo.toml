@@ -14,3 +14,4 @@ litex-pac = { version = "0.1.0", path = "./litex-pac" }
 log = "0.4.17"
 #numtoa = "0.2.4"
 riscv = "0.8"
+size = { version = "0.4.0", default-features = false }

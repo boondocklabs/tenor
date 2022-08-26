@@ -8,12 +8,12 @@ pub fn mcycle() -> u32 {
     return t;
 }
 
-pub fn timeit<R>(f: impl FnOnce() -> R) -> R {
+pub fn timeit<R>(msg: &str, f: impl FnOnce() -> R) -> R {
     let t1 = riscv::register::mcycle::read64();
     let r = f();
     let t2 = riscv::register::mcycle::read64();
     let elapsed = t2-t1;
 
-    info!("Took {} cycles", elapsed);
+    info!("{} took {} cycles", msg, elapsed);
     return r;
 }

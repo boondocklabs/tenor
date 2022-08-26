@@ -2,6 +2,7 @@
 #![no_main]
 
 #![feature(alloc_error_handler)]
+#![feature(box_syntax)]
 //#![feature(default_alloc_error_handler)]
 
 
@@ -13,6 +14,7 @@ mod uart_log;
 mod dma_test;
 mod driver;
 mod time;
+mod util;
 
 extern crate alloc;
 use alloc::boxed::Box;
@@ -22,7 +24,7 @@ core::arch::global_asm!(include_str!("asm/boot.S"));
 core::arch::global_asm!(include_str!("asm/trap.S"));
 
 use core::alloc::GlobalAlloc;
-use core::fmt::{Write};
+use core::fmt::{Write, Display};
 use core::panic::PanicInfo;
 use core::ptr::write_volatile;
 
@@ -44,7 +46,9 @@ use crate::dma_test::DMATest;
 use time::timeit;
 
 use linked_list_allocator::LockedHeap;
+
 //use numtoa::NumToA;
+use util::{SizeFormat};
 
 #[alloc_error_handler]
 fn allocation_error(_: core::alloc::Layout) -> ! {
@@ -100,8 +104,11 @@ pub fn init_heap() {
         let heap_start = &_heap_start as *const usize as usize;
         let heap_end = &_heap_end as *const usize as usize;
         let heap_size = heap_end - heap_start;
-        info!("Heap start: {} size: {}", heap_start, heap_size);
-        info!("Heap start: {:p} end: {:p}", heap_start as *mut u8, heap_end as *mut u8);
+        info!("Heap start: {:p} end: {:p} size: {} MiB",
+            heap_start as *mut u8,
+            heap_end as *mut u8,
+            heap_size / (1024*1024)
+        );
         ALLOCATOR.lock().init(heap_start as *mut u8, heap_size);
     }
 }
@@ -125,51 +132,23 @@ fn putchar(ch: char) {
 #[no_mangle]
 #[link_section = ".riscv.trap"]
 pub unsafe extern "C" fn machine_trap() {
-    putchar('Q');
-
-    let mut cause: usize = 0;
-    unsafe {
-        core::arch::asm!("csrr {cause}, mcause", cause = out(reg) cause)
-    }
-
-    putchar('\n');
-    putchar(('0' as u8 + (cause & 0xff) as u8) as char);
-    putchar('\n');
-    putchar(('0' as u8 + (cause >> 8 & 0xff) as u8) as char);
-    putchar('\n');
-    putchar(('0' as u8 + (cause >> 16 & 0xff) as u8) as char);
-    return;
-
-    //let mut buf = [0u8; 20];
-    //let a = cause.numtoa_str(16, &mut buf);
-
-    //for i in a.chars() {
-        //putchar(i);
-    //}
-
-
-    return;
     
-    //let mepc = riscv::register::mepc::read();
-    //let mtval = riscv::register::mtval::read();
     let mcause = riscv::register::mcause::read();
-    //let mhartid = riscv::register::mhartid::read();
-    //let mstatus = riscv::register::mstatus::read();
 
     match mcause.cause() {
         riscv::register::mcause::Trap::Exception(e) => {
-            unsafe {core::arch::asm!("
-            li t0, 0xF0003000
-            li t1, 0x65
-            sb t1, 0(t0)
-            ")};
-            //let code = mcause.code();
+            let mhartid = riscv::register::mhartid::read();
+            let mepc = riscv::register::mepc::read();
+            let mtval = riscv::register::mtval::read();
+            let mstatus = riscv::register::mstatus::read();
 
-            //info!("EXCEPTION {:#?} code={}", e, code);
-            //info!("MEPC: 0x{:08X}", mepc);
-            //info!("MTVAL: 0x{:08X}", mtval);
-            //info!("MCAUSE: 0x{:08X}", mcause.bits());
-            //info!("MHARTID: 0x{:08X}", mhartid);
+            let code = mcause.code();
+
+            info!("EXCEPTION {:#?} code={}", e, code);
+            info!("MEPC: 0x{:08X}", mepc);
+            info!("MTVAL: 0x{:08X}", mtval);
+            info!("MCAUSE: 0x{:08X}", mcause.bits());
+            info!("MHARTID: 0x{:08X}", mhartid);
 
             loop {}
         }
@@ -221,7 +200,6 @@ extern "C" fn main() {
 
     // Initialize the UART
     let mut uart = uart::Uart::new(peripherals.UART);
-    write!(uart, "\r\n\r\n").unwrap();
     write!(uart, "{}\r\n", banner.fg(blue_magenta())).unwrap();
     write!(uart, "{}", "Rust RISCV Kernel Booting\r\n".fg(cyan_blue())).unwrap();
     UART.set(uart);
@@ -250,7 +228,12 @@ extern "C" fn main() {
 
     // Enable interrupts
     unsafe {
+        // Enable external interrupts from the VexRiscv interrupt controller
+        riscv::register::mie::set_mext();
+
+        // Enable global interrupts
         riscv::interrupt::enable();
+
         VexRiscvInterrupt::write_mask(usize::MAX);
     }
 
@@ -263,112 +246,42 @@ extern "C" fn main() {
 
     info!("Allocated {:p}, {:p}", data, dest);
 
+    dmatest();
+
     loop {
         unsafe{ wfi() };
     }
 }
 
-#[no_mangle]
-//#[link_section = ".text.start"]
-extern "C" fn xxxmain() {
-    putchar('M');
-    putchar('A');
-    putchar('I');
-    putchar('N');
-    //putchar('M');
-    //unsafe {crash()};
+fn dmatest() {
 
-    /*
-    let s = "MAIN\r\n";
-    for i in s.chars() {
-        //putchar(i);
-    }
-    */
+    const NUM: usize = (256*1024);
+    let mut data = box [0 as u8; NUM];
+    let mut dest = box [0 as u8; NUM];
 
-    //putchar('A');
-
-    let peripherals = litex_pac::Peripherals::take().unwrap();
-
-    // Initialize the UART
-    let mut uart = uart::Uart::new(peripherals.UART);
-    write!(uart, "\r\n\r\n").unwrap();
-    write!(uart, "{}", "Rust RISCV Kernel Booting\r\n".fg(cyan_blue())).unwrap();
-    UART.set(uart);
-
-    unsafe {
-        log::set_logger_racy(&LOGGER)
-            .map(|()| log::set_max_level(LevelFilter::Trace))
-            .unwrap();
-    }
-
-    info!("Logging initialized");
-
-    //init_heap();
-
-    // Initialize timers
-    let timer0 = timer::Timer::new(peripherals.TIMER0, 2e6 as usize);
-    let timer1= timer::Timer::new(peripherals.TIMER1, 3e6 as usize);
-
-    //let bpu = bpu::BufferProcessingUnit::new(peripherals.BPU);
-
-    let dma: DMATest = dma_test::DMATest::new(peripherals.DMATEST);
-
-    // Set the driver instances. From this point on, all drivers are accessed using:
-    // DEVICE.access(|driver| { driver.method() })
-    TIMER0.set(timer0);
-    TIMER1.set(timer1);
-    DMATEST.set(dma);
-
-    // Enable interrupts
-    unsafe {
-        riscv::interrupt::enable();
-        VexRiscvInterrupt::write_mask(usize::MAX);
-    }
-
-    info!("Starting main loop");
-    info!("Starting DMA test");
-
-    const NUM: usize = (1024*1024*32);
-
-    //let mut data = Box::new([0; NUM]);
-    //let mut dest = Box::new([0; NUM]);
-
-
-    let mut data = [0 as u8; NUM];
-    let mut dest = [0 as u8; NUM];
+    info!("Starting DMA test {:p} -> {:p}", data, dest);
 
     let mut count = 0u8;
     loop {
-        /*
-        info!("CLONE:");
-        timeit(|| {
-            dest = data.clone();
+        timeit("CPU buffer fill", || {
+            for i in 1..NUM+1 {
+                data[(i-1) as usize] = count + i as u8 % 8;
+            }
         });
-        */
-
-        for i in 1..NUM+1 {
-            data[(i-1) as usize] = count + i as u8 % 8;
-        }
 
         count += 1;
 
-        assert_ne!(data, dest);
-
-        timeit(|| {
+        timeit("DMA copy", || {
             DMATEST.access(|dma| {
-                //dma.copy(&*data, &*dest, NUM as usize);
-                dma.copy(&data, &dest, NUM as usize);
+                dma.copy(&*data, &*dest, NUM as usize);
                 dma.wait();
                 //dma.dump();
             });
         });
 
-        //info!("Source: {:02X?}", data);
-        //info!("Dest: {:02X?}", dest);
-
-        assert_eq!(data, dest);
+        timeit("CPU buffer compare", || {
+            assert_eq!(data, dest);
+        });
         info!("{}", "Pass".fg(green_cyan()));
-
-        unsafe { wfi() };
     }
 }

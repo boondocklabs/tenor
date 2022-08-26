@@ -67,6 +67,7 @@ dependencies = [
  "litex-pac",
  "log",
  "riscv",
+ "size",
 ]
 
 [[package]]
@@ -145,6 +146,12 @@ name = "scopeguard"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d29ab0c6d3fc0ee92fe66e2d99f700eab17a8d57d1c1d3b748380fb20baa78cd"
+
+[[package]]
+name = "size"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "63c9c8350184b6b037d09dc77df55f1324df076a706d0191b79ec270cc4d756b"
 
 [[package]]
 name = "spinning_top"

@@ -5,34 +5,6 @@
 .section .text.init
 
 trap_entry:
-  li t0, 0xF0003000
-	li t1, 0x7A
-	sb t1, 0(t0)
-
-  li t0, 0xF0003000
-	li t1, '\r'
-	sb t1, 0(t0)
-  li t0, 0xF0003000
-	li t1, '\n'
-	sb t1, 0(t0)
-
-  csrr t1, mcause
-  call print_word
-
-  csrr t1, mepc
-  call print_word
-
-
-  li a0, 0xF0003000
-  li a1, 'D'
-	sb a1, 0(a0)
-  li t0, 0xF0003000
-	li t1, '\r'
-	sb t1, 0(t0)
-  li t0, 0xF0003000
-	li t1, '\n'
-	sb t1, 0(t0)
-
   sw x1,  - 1*4(sp)
   sw x5,  - 2*4(sp)
   sw x6,  - 3*4(sp)
@@ -50,8 +22,7 @@ trap_entry:
   sw x30, -15*4(sp)
   sw x31, -16*4(sp)
   addi sp,sp,-16*4
-  //jal ra, machine_trap
-  //call machine_trap
+  call machine_trap
   lw x1 , 15*4(sp)
   lw x5,  14*4(sp)
   lw x6,  13*4(sp)
