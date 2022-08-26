@@ -31,7 +31,7 @@ class DMATest(Module, AutoCSR):
         ]);
         
         self.control = CSRStorage(32, fields=[
-            CSRField(name="enable", size=1, description="Enable DMA")
+            CSRField(name="enable", size=1, description="Enable DMA", reset=0)
         ])
 
         # DMA Reader source

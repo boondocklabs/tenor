@@ -10,7 +10,6 @@ cargo build
 ./fpga/sim_run.py \
 	--integrated-sram-size 1048576 \
 	--integrated-main-ram-size 134217728 \
-	--timer-uptime \
 	--cpu-type=vexriscv \
-	--cpu-variant=imac+debug \
+	--cpu-variant=imac \
 	--ram-init kernel.bin

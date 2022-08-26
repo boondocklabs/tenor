@@ -1,49 +1,9 @@
 .global  trap_entry
 .global machine_trap
+.global print_word
 .align 4
-.section .riscv.trap
+.section .text.init
 
-// Print word in T1
-print_word:
-  li t6, 0
-  li t5, 7
-  li t4, 9
-loop:
-  li t3, 0xf0000000
-  // Mask nibble
-  and t2, t1, t3
-
-  // Shift the nibble right
-  srli t2, t2, 28
-
-  // If nibble < 10, add '0', else add 'A'
-  bge t2, t4, alpha
-  addi t2, t2, '0'
-  j print
-alpha:
-  addi t2, t2, '7'
-  
-print:
-  li a0, 0xF0003000
-	sb t2, 0(a0)
-
-  // Shift word left 4 bits
-  slli t1, t1, 4
-
-  addi t5, t5, -1
-
-  bge t5, t6, loop
-
-  li t0, 0xF0003000
-	li t1, '\r'
-	sb t1, 0(t0)
-  li t0, 0xF0003000
-	li t1, '\n'
-	sb t1, 0(t0)
-
-  ret
-
-.align 4
 trap_entry:
   li t0, 0xF0003000
 	li t1, 0x7A
@@ -111,3 +71,46 @@ trap_entry:
   addi sp,sp,16*4
   mret
   .text
+
+
+
+.section .riscv.trap
+// Print word in T1
+print_word:
+  li t6, 0
+  li t5, 7
+  li t4, 10 
+loop:
+  li t3, 0xf0000000
+  // Mask nibble
+  and t2, t1, t3
+
+  // Shift the nibble right
+  srli t2, t2, 28
+
+  // If nibble < 10, add '0', else add 'A'
+  bge t2, t4, alpha
+  addi t2, t2, '0'
+  j print
+alpha:
+  addi t2, t2, '7'
+  
+print:
+  li a0, 0xF0003000
+	sb t2, 0(a0)
+
+  // Shift word left 4 bits
+  slli t1, t1, 4
+
+  addi t5, t5, -1
+
+  bge t5, t6, loop
+
+  li t0, 0xF0003000
+	li t1, '\r'
+	sb t1, 0(t0)
+  li t0, 0xF0003000
+	li t1, '\n'
+	sb t1, 0(t0)
+  
+  ret

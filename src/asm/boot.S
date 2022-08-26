@@ -13,22 +13,18 @@ _start:
 runtime_init:
 
 	// Write to UART (address depends on SoC config)
-	li t0, 0xF0003000
-	li t1, 0x41
-	sb t1, 0(t0)
+	//li t0, 0xF0003000
+	//li t1, 0x41
+	//sb t1, 0(t0)
 
 stack_init:
-	//la gp, _global_pointer
+	la gp, __global_pointer$
 
 	la sp, _stack_end
   
 	la a0, trap_entry
 	csrw mtvec, a0
-	csrw mscratch, 0
-
-	li t0, 0xF0003000
-	li t1, 0x42
-	sb t1, 0(t0)
+	//csrw mscratch, 0
 
 bss_init:
 	la a0, _bss_start
@@ -43,13 +39,9 @@ bss_loop:
 bss_done:
 
 	//li a0, 0x880  //880 enable timer + external interrupt sources (until mstatus.MIE is set, they will never trigger an interrupt)
-	//li a0, 0x0
-	//csrw mie,a0
+	li a0, 0x0
+	csrw mie,a0
 
-	// Write to UART (address depends on SoC config)
-	li t0, 0xF0003000
-	li t1, 0x43
-	sb t1, 0(t0)
 	call main
 
 halt_loop:

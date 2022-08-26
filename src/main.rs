@@ -1,7 +1,9 @@
 #![no_std]
 #![no_main]
 
-#![feature(default_alloc_error_handler)]
+#![feature(alloc_error_handler)]
+//#![feature(default_alloc_error_handler)]
+
 
 mod uart;
 mod timer;
@@ -12,16 +14,16 @@ mod dma_test;
 mod driver;
 mod time;
 
-//extern crate alloc;
-//use alloc::boxed::Box;
+extern crate alloc;
+use alloc::boxed::Box;
 use driver::{DriverAccess};
 
 core::arch::global_asm!(include_str!("asm/boot.S"));
 core::arch::global_asm!(include_str!("asm/trap.S"));
 
+use core::alloc::GlobalAlloc;
 use core::fmt::{Write};
 use core::panic::PanicInfo;
-//use core::sync::atomic::AtomicUsize;
 use core::ptr::write_volatile;
 
 use interrupt::VexRiscvInterrupt;
@@ -33,7 +35,7 @@ use riscv as _;
 use critical_section::{Mutex, RawRestoreState};
 
 use ansi_rgb::{ Foreground };
-use ansi_rgb::{ cyan_blue, green_cyan };
+use ansi_rgb::{ cyan_blue, green_cyan, blue_magenta };
 
 use log::{LevelFilter, info, error};
 
@@ -41,8 +43,14 @@ use crate::dma_test::DMATest;
 
 use time::timeit;
 
-//use linked_list_allocator::LockedHeap;
-use numtoa::NumToA;
+use linked_list_allocator::LockedHeap;
+//use numtoa::NumToA;
+
+#[alloc_error_handler]
+fn allocation_error(_: core::alloc::Layout) -> ! {
+    info!("Allocation failed");
+    panic!();
+}
 
 
 driver_add!(UART, uart::Uart);
@@ -78,24 +86,25 @@ unsafe fn crash() {
 
 static LOGGER: UartLogger = UartLogger;
 
-/*
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
 
 // These are defined in the linker script (lds/litex-sim.lds)
 extern "C" {
-    static _heap_start: u8; 
-    static _heap_size: usize;
+    static _heap_start: usize; 
+    static _heap_end: usize;
 }
 
 pub fn init_heap() {
     unsafe {
-        let heap_start = _heap_start;
-        let heap_size = _heap_size;
+        let heap_start = &_heap_start as *const usize as usize;
+        let heap_end = &_heap_end as *const usize as usize;
+        let heap_size = heap_end - heap_start;
+        info!("Heap start: {} size: {}", heap_start, heap_size);
+        info!("Heap start: {:p} end: {:p}", heap_start as *mut u8, heap_end as *mut u8);
         ALLOCATOR.lock().init(heap_start as *mut u8, heap_size);
     }
 }
-*/
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
@@ -106,11 +115,10 @@ fn panic(info: &PanicInfo) -> ! {
 }
 
 fn putchar(ch: char) {
+    const UART_ADDR: *const litex_pac::uart::RegisterBlock = litex_pac::UART::PTR;
+
     unsafe {
-       core::arch::asm!("
-            li a1, 0xF0003000
-            sb {ch}, 0(a1)
-           ", ch = in(reg) ch as u8);
+        write_volatile(UART_ADDR as *mut char, ch);
     }
 }
 
@@ -132,12 +140,12 @@ pub unsafe extern "C" fn machine_trap() {
     putchar(('0' as u8 + (cause >> 16 & 0xff) as u8) as char);
     return;
 
-    let mut buf = [0u8; 20];
-    let a = cause.numtoa_str(16, &mut buf);
+    //let mut buf = [0u8; 20];
+    //let a = cause.numtoa_str(16, &mut buf);
 
-    for i in a.chars() {
-        putchar(i);
-    }
+    //for i in a.chars() {
+        //putchar(i);
+    //}
 
 
     return;
@@ -206,56 +214,80 @@ pub unsafe extern "C" fn machine_trap() {
 }
 
 #[no_mangle]
-#[link_section = ".text.start"]
 extern "C" fn main() {
-    putchar('M');
-    //unsafe {crash()};
+    let peripherals = litex_pac::Peripherals::take().unwrap();
 
-    let s = "MAIN\r\n";
-    for i in s.chars() {
-        putchar(i);
+    let banner = include_str!("banner.txt");
+
+    // Initialize the UART
+    let mut uart = uart::Uart::new(peripherals.UART);
+    write!(uart, "\r\n\r\n").unwrap();
+    write!(uart, "{}\r\n", banner.fg(blue_magenta())).unwrap();
+    write!(uart, "{}", "Rust RISCV Kernel Booting\r\n".fg(cyan_blue())).unwrap();
+    UART.set(uart);
+
+    unsafe {
+        log::set_logger_racy(&LOGGER)
+            .map(|()| log::set_max_level(LevelFilter::Trace))
+            .unwrap();
     }
 
+    info!("Logging initialized");
+
+    init_heap();
+    info!("Heap initialized");
+
+    // Initialize timers
+    let timer0 = timer::Timer::new(peripherals.TIMER0, 2e6 as usize);
+    let timer1= timer::Timer::new(peripherals.TIMER1, 3e6 as usize);
+    let dma: DMATest = dma_test::DMATest::new(peripherals.DMATEST);
+
+    // Set the driver instances. From this point on, all drivers are accessed using:
+    // DEVICE.access(|driver| { driver.method() })
+    TIMER0.set(timer0);
+    TIMER1.set(timer1);
+    DMATEST.set(dma);
+
+    // Enable interrupts
+    unsafe {
+        riscv::interrupt::enable();
+        VexRiscvInterrupt::write_mask(usize::MAX);
+    }
+
+    info!("Interrupts enabled");
+
+    const NUM: usize = (1024*1024*32);
+
+    let data = Box::new(0);
+    let dest = Box::new(0);
+
+    info!("Allocated {:p}, {:p}", data, dest);
+
+    loop {
+        unsafe{ wfi() };
+    }
+}
+
+#[no_mangle]
+//#[link_section = ".text.start"]
+extern "C" fn xxxmain() {
+    putchar('M');
+    putchar('A');
+    putchar('I');
+    putchar('N');
+    //putchar('M');
     //unsafe {crash()};
 
     /*
-    loop {
-
-
-    unsafe {core::arch::asm!("
-    ;csrrw	t6, mscratch, t6
-    li t0, 0xF0003000
-	li t1, 0x43
-	sb t1, 0(t0)
-    ")};
+    let s = "MAIN\r\n";
+    for i in s.chars() {
+        //putchar(i);
     }
     */
-    //let a = core::sync::atomic::AtomicUsize::new(0);
 
-    //let mstatus = riscv::register::mstatus::read();
-
-    unsafe {core::arch::asm!("
-    li t0, 0xF0003000
-    li t1, 0x58
-    sb t1, 0(t0)
-    ")};
-
-    riscv::interrupt::free(|cs| {
-        unsafe {core::arch::asm!("
-        li t0, 0xF0003000
-        li t1, 0x57
-        sb t1, 0(t0)
-        ")};
-
-    });
+    //putchar('A');
 
     let peripherals = litex_pac::Peripherals::take().unwrap();
-
-    unsafe {core::arch::asm!("
-    li t0, 0xF0003000
-	li t1, 0x44
-	sb t1, 0(t0)
-    ")};
 
     // Initialize the UART
     let mut uart = uart::Uart::new(peripherals.UART);

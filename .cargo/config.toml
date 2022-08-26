@@ -1,5 +1,4 @@
 [build]
 target = "riscv32imac-unknown-none-elf"
 rustflags = ['-Clink-arg=-Tsrc/lds/litex-sim.ld']
-#rustflags = ['-Clink-arg=-Tsrc/lds/litex-sim.ld', "-Cllvm-args=-align-all-functions=2"]
 

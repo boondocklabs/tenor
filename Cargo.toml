@@ -8,8 +8,9 @@ edition = "2021"
 [dependencies]
 ansi_rgb = "0.2.0"
 critical-section = { version = "1.1.0", features = ["restore-state-bool"] }
+linked_list_allocator = "0.10.1"
 #linked_list_allocator = "0.10.1"
 litex-pac = { version = "0.1.0", path = "./litex-pac" }
 log = "0.4.17"
-numtoa = "0.2.4"
+#numtoa = "0.2.4"
 riscv = "0.8"
