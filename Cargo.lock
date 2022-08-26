@@ -68,6 +68,7 @@ dependencies = [
  "log",
  "riscv",
  "size",
+ "spinning_top",
 ]
 
 [[package]]

@@ -5,6 +5,8 @@
 #![feature(box_syntax)]
 //#![feature(default_alloc_error_handler)]
 
+#[macro_use]
+extern crate alloc;
 
 mod uart;
 mod timer;
@@ -15,16 +17,17 @@ mod dma_test;
 mod driver;
 mod time;
 mod util;
+mod task;
 
-extern crate alloc;
 use alloc::boxed::Box;
+use alloc::string::ToString;
 use driver::{DriverAccess};
+use task::{LockedTaskManager, Task};
 
 core::arch::global_asm!(include_str!("asm/boot.S"));
 core::arch::global_asm!(include_str!("asm/trap.S"));
 
-use core::alloc::GlobalAlloc;
-use core::fmt::{Write, Display};
+use core::fmt::{Write};
 use core::panic::PanicInfo;
 use core::ptr::write_volatile;
 
@@ -42,20 +45,16 @@ use ansi_rgb::{ cyan_blue, green_cyan, blue_magenta };
 use log::{LevelFilter, info, error};
 
 use crate::dma_test::DMATest;
+use crate::task::TaskWorker;
 
 use time::timeit;
 
 use linked_list_allocator::LockedHeap;
 
-//use numtoa::NumToA;
-use util::{SizeFormat};
-
 #[alloc_error_handler]
 fn allocation_error(_: core::alloc::Layout) -> ! {
-    info!("Allocation failed");
-    panic!();
+    panic!("Memory allocation failed");
 }
-
 
 driver_add!(UART, uart::Uart);
 driver_add!(TIMER0, timer::Timer<TIMER0>);
@@ -89,6 +88,7 @@ unsafe fn crash() {
 }
 
 static LOGGER: UartLogger = UartLogger;
+static TASKMAN: LockedTaskManager = LockedTaskManager::new();
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -239,6 +239,8 @@ extern "C" fn main() {
 
     info!("Interrupts enabled");
 
+    start_tasks();
+
     const NUM: usize = (1024*1024*32);
 
     let data = Box::new(0);
@@ -246,10 +248,15 @@ extern "C" fn main() {
 
     info!("Allocated {:p}, {:p}", data, dest);
 
-    dmatest();
+    //dmatest();
 
+    // Main loop
+    // NOTE: The wfi instruction is not guaranteed to work on all implementations,
+    // but in the case of VexRiscv we can use it in an idle loop and drive the task
+    // scheduler.
     loop {
         unsafe{ wfi() };
+        TASKMAN.lock().tick()
     }
 }
 
@@ -284,4 +291,36 @@ fn dmatest() {
         });
         info!("{}", "Pass".fg(green_cyan()));
     }
+}
+
+
+fn start_tasks() {
+    let mut taskman = TASKMAN.lock();
+
+    struct StatusTask;
+
+    impl TaskWorker for StatusTask {
+        fn run(&self) {
+            info!("Status task running...");
+        }
+
+        fn init(&self) {
+            info!("Status task initialized");
+        }
+    }
+
+    let task = Task::new("Status".to_string(), Box::new(StatusTask{}));
+
+    
+    struct TestTask;
+
+    impl TaskWorker for TestTask {
+        fn run(&self) { info!("Second test task..") }
+        fn init(&self) {}
+    }
+    let task2 = Task::new("Status".to_string(), Box::new(TestTask{}));
+
+    taskman.add(task);
+    taskman.add(task2);
+    
 }
