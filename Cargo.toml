@@ -7,11 +7,15 @@ edition = "2021"
 
 [dependencies]
 ansi_rgb = "0.2.0"
+backtrace = { version = "0.3.66", default-features = false }
 critical-section = { version = "1.1.0", features = ["restore-state-bool"] }
+hashbrown = "0.12.3"
+lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 linked_list_allocator = "0.10.1"
 #linked_list_allocator = "0.10.1"
 litex-pac = { version = "0.1.0", path = "./litex-pac" }
 log = "0.4.17"
+memoffset = { version = "0.6.5", features = ["unstable_const"] }
 #numtoa = "0.2.4"
 riscv = "0.8"
 size = { version = "0.4.0", default-features = false }

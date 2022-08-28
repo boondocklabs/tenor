@@ -4,7 +4,8 @@ use litex_pac::TIMER0;
 use litex_pac::TIMER1;
 
 pub struct Timer<T: TimerPeripheral> {
-    timer: T
+    timer: T,
+    callback: Option<fn()>
 }
 
 impl<T: TimerPeripheral> Timer<T> {
@@ -12,16 +13,27 @@ impl<T: TimerPeripheral> Timer<T> {
         timer.init_periodic(reload);
 
         Timer {
-            timer: timer
+            timer: timer,
+            callback: None
         }
     }
 
     pub fn handle_interrupt(&self) {
+        match self.callback {
+            Some(f) => {
+                f();
+            },
+            None => {}
+        }
         self.timer.clear_pending();
     }
 
     pub fn value(&self) -> u32 {
         return self.timer.value();
+    }
+
+    pub fn set_callback(&mut self, f: fn()) {
+        self.callback = Some(f)
     }
 }
 

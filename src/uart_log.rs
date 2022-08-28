@@ -14,8 +14,21 @@ impl log::Log for UartLogger {
 
     fn log(&self, record: &Record) {
         if self.enabled(record.metadata()) {
+
+            let level = match record.level() {
+                Level::Error => {
+                    record.level().fg(ansi_rgb::red())
+                },
+                Level::Warn => {
+                    record.level().fg(ansi_rgb::yellow())
+                }
+                _ => {
+                    record.level().fg(ansi_rgb::cyan_blue())
+                }
+            };
+
             crate::UART.access(|uart| {
-                writeln!(uart, "[{}] - {}", record.level().fg(cyan_blue()), record.args().fg(cyan())).unwrap();
+                writeln!(uart, "[{}] - {}", level.fg(cyan_blue()), record.args().fg(cyan())).unwrap();
             });
         }
     }

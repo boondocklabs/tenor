@@ -3,10 +3,27 @@
 
 #![feature(alloc_error_handler)]
 #![feature(box_syntax)]
-//#![feature(default_alloc_error_handler)]
+
+// This allows us to use LLVM intrinsics to get
+// the return address of a Rust function for
+// the context switcher
+#![feature(link_llvm_intrinsics)]
+
+#![feature(naked_functions)]
+
+// Allow the offset_of! macro to work as a const
+// to get the register offset in the Thread context
+#![feature(const_ptr_offset_from, const_refs_to_cell)]
+
+// Allow passing consts to inline asm in naked functions
+#![feature(asm_const)]
+
 
 #[macro_use]
 extern crate alloc;
+
+#[macro_use]
+extern crate lazy_static;
 
 mod uart;
 mod timer;
@@ -18,11 +35,15 @@ mod driver;
 mod time;
 mod util;
 mod task;
+mod thread;
 
 use alloc::boxed::Box;
 use alloc::string::ToString;
 use driver::{DriverAccess};
-use task::{LockedTaskManager, Task};
+use task::manager::{LockedTaskManager};
+use task::Task;
+use thread::ThreadId;
+use thread::scheduler::LockedThreadScheduler;
 
 core::arch::global_asm!(include_str!("asm/boot.S"));
 core::arch::global_asm!(include_str!("asm/trap.S"));
@@ -45,11 +66,13 @@ use ansi_rgb::{ cyan_blue, green_cyan, blue_magenta };
 use log::{LevelFilter, info, error};
 
 use crate::dma_test::DMATest;
-use crate::task::TaskWorker;
+use crate::task::context::TaskContext;
+//use crate::thread::IdleThread;
 
 use time::timeit;
 
 use linked_list_allocator::LockedHeap;
+use backtrace;
 
 #[alloc_error_handler]
 fn allocation_error(_: core::alloc::Layout) -> ! {
@@ -89,6 +112,7 @@ unsafe fn crash() {
 
 static LOGGER: UartLogger = UartLogger;
 static TASKMAN: LockedTaskManager = LockedTaskManager::new();
+static SCHEDULER: LockedThreadScheduler = LockedThreadScheduler::new();
 
 #[global_allocator]
 static ALLOCATOR: LockedHeap = LockedHeap::empty();
@@ -115,7 +139,26 @@ pub fn init_heap() {
 
 #[panic_handler]
 fn panic(info: &PanicInfo) -> ! {
+    unsafe {riscv::interrupt::disable()};
+
     error!("PANIC {:#?}", info);
+
+    unsafe {
+        backtrace::trace_unsynchronized(|frame| {
+            backtrace::resolve_frame_unsynchronized(frame, |symbol| {
+                info!("[0x{:08X?}] {:?} (0x{:08X?}) {:?}:{:?}",
+                    frame.ip(),
+                    symbol.name(),
+                    frame.symbol_address(),
+                    symbol.filename_raw(),
+                    symbol.lineno()
+                )
+            });
+
+            true
+        });
+    }
+
     loop {
         unsafe { wfi() };
     }
@@ -145,9 +188,9 @@ pub unsafe extern "C" fn machine_trap() {
             let code = mcause.code();
 
             info!("EXCEPTION {:#?} code={}", e, code);
-            info!("MEPC: 0x{:08X}", mepc);
-            info!("MTVAL: 0x{:08X}", mtval);
-            info!("MCAUSE: 0x{:08X}", mcause.bits());
+            info!("   MEPC: 0x{:08X}", mepc);
+            info!("  MTVAL: 0x{:08X}", mtval);
+            info!(" MCAUSE: 0x{:08X}", mcause.bits());
             info!("MHARTID: 0x{:08X}", mhartid);
 
             loop {}
@@ -216,7 +259,7 @@ extern "C" fn main() {
     info!("Heap initialized");
 
     // Initialize timers
-    let timer0 = timer::Timer::new(peripherals.TIMER0, 2e6 as usize);
+    let timer0 = timer::Timer::new(peripherals.TIMER0, 1000000);
     let timer1= timer::Timer::new(peripherals.TIMER1, 3e6 as usize);
     let dma: DMATest = dma_test::DMATest::new(peripherals.DMATEST);
 
@@ -239,14 +282,9 @@ extern "C" fn main() {
 
     info!("Interrupts enabled");
 
-    start_tasks();
+    thread_test();
 
-    const NUM: usize = (1024*1024*32);
-
-    let data = Box::new(0);
-    let dest = Box::new(0);
-
-    info!("Allocated {:p}, {:p}", data, dest);
+    //start_tasks();
 
     //dmatest();
 
@@ -256,7 +294,8 @@ extern "C" fn main() {
     // scheduler.
     loop {
         unsafe{ wfi() };
-        TASKMAN.lock().tick()
+        //TASKMAN.lock().tick();
+        SCHEDULER.lock().tick();
     }
 }
 
@@ -293,34 +332,37 @@ fn dmatest() {
     }
 }
 
+fn thread_test() {
 
-fn start_tasks() {
-    let mut taskman = TASKMAN.lock();
+    TIMER0.access(|t| {
+        t.set_callback(|| {
+            // Timer callback..
+        })
+    });
 
-    struct StatusTask;
+    // Setup the main thread context
+    let idle_context = thread::context::ThreadContext::new(0);
 
-    impl TaskWorker for StatusTask {
-        fn run(&self) {
-            info!("Status task running...");
-        }
+    let idle = thread::Thread {
+        id: ThreadId::new(),
+        context: idle_context,
+        state: thread::ThreadState::Idle
+    };
 
-        fn init(&self) {
-            info!("Status task initialized");
-        }
-    }
+    let idle_id = thread::thread_add(idle);
+    thread::set_current(idle_id);
 
-    let task = Task::new("Status".to_string(), Box::new(StatusTask{}));
+    thread::spawn(|| {
+        log::info!("Hello from thread1");
+    });
+    log::info!("Thread spawned! Back in main thread...");
 
-    
-    struct TestTask;
+    thread::spawn(|| {
+        log::info!("Hello from thread2");
+    });
+    log::info!("Thread spawned! Back in main thread...");
 
-    impl TaskWorker for TestTask {
-        fn run(&self) { info!("Second test task..") }
-        fn init(&self) {}
-    }
-    let task2 = Task::new("Status".to_string(), Box::new(TestTask{}));
-
-    taskman.add(task);
-    taskman.add(task2);
-    
+    thread::spawn(|| {
+        dmatest();
+    })
 }
