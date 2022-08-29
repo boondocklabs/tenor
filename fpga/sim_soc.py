@@ -35,6 +35,7 @@ from litescope import LiteScopeAnalyzer
 from bpu import BPU
 
 from dma_test import DMATest
+from tmu import ThreadManagementUnit
 
 # IOs ----------------------------------------------------------------------------------------------
 
@@ -326,3 +327,7 @@ class SimSoC(SoCCore):
         self.bus.add_master(name="dma_read", master=dma.read_bus)
         self.bus.add_master(name="dma_write", master=dma.write_bus)
         self.irq.add("dmatest", use_loc_if_exists=True)
+
+        tmu = ThreadManagementUnit()
+        self.submodules.tmu = tmu
+        self.irq.add("tmu", use_loc_if_exists=True)

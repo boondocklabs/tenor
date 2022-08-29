@@ -7,16 +7,31 @@ pub struct Uart {
 }
 
 impl Uart {
-    pub fn new(uart: UART) -> Self {
+    pub fn new(mut uart: UART) -> Self {
+
+        /*
+        Set the baud rate. First check if the BIOS leaves the UART configured at 115200
+        uart.tuning_word.write(|w| {
+            w.tuning_word().bits(0);
+        })
+        */
+
+        uart.ev_enable.write(|w| {
+            w.tx().clear_bit();
+            w.rx().set_bit()
+        });
+
         Uart { uart: uart }
     }
 
     pub fn write_byte(&mut self, byte: u8) {
-        if self.uart.txfull.read().bits() == 0 {
-            self.uart.rxtx.write(|w| {
-                unsafe {w.bits(byte as u32)}
-            });
+        while self.uart.txfull.read().txfull() == true {
+            unsafe { riscv::asm::wfi() };
         }
+ 
+        self.uart.rxtx.write(|w| {
+            unsafe {w.bits(byte as u32)}
+        });
     }
 
     pub fn read_byte(&self) -> Result<u8, u8> {
@@ -35,7 +50,9 @@ impl Uart {
     }
 
     pub fn handle_interrupt(&mut self) {
-        if self.uart.ev_status.read().rx().bit_is_set() == true {
+        //write!(self, "UART pending {:#b}", self.uart.ev_pending.read().bits()).unwrap();
+
+        if self.uart.ev_pending.read().rx().bit_is_set() == true {
 
             while self.uart.rxempty.read().rxempty() == false {
                 match self.read_byte() {
@@ -47,10 +64,17 @@ impl Uart {
                     }
                 }
             }
+
+            self.uart.ev_pending.write(|w| {
+                w.rx().set_bit()
+            });
         }
 
-        if self.uart.ev_status.read().tx().bit_is_set() == true {
+        if self.uart.ev_pending.read().tx().bit_is_set() == true {
             // Handle TX events..
+            self.uart.ev_pending.write(|w| {
+                w.tx().set_bit()
+            });
         }
     }
 }

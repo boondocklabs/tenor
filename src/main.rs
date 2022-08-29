@@ -25,10 +25,10 @@ extern crate alloc;
 #[macro_use]
 extern crate lazy_static;
 
+mod trap;
 mod uart;
 mod timer;
 mod interrupt;
-//mod bpu;
 mod uart_log;
 mod dma_test;
 mod driver;
@@ -36,12 +36,9 @@ mod time;
 mod util;
 mod task;
 mod thread;
+mod tmu;
 
-use alloc::boxed::Box;
-use alloc::string::ToString;
 use driver::{DriverAccess};
-use task::manager::{LockedTaskManager};
-use task::Task;
 use thread::ThreadId;
 use thread::scheduler::LockedThreadScheduler;
 
@@ -65,9 +62,7 @@ use ansi_rgb::{ cyan_blue, green_cyan, blue_magenta };
 
 use log::{LevelFilter, info, error};
 
-use crate::dma_test::DMATest;
-use crate::task::context::TaskContext;
-//use crate::thread::IdleThread;
+use dma_test::DMATest;
 
 use time::timeit;
 
@@ -83,6 +78,7 @@ driver_add!(UART, uart::Uart);
 driver_add!(TIMER0, timer::Timer<TIMER0>);
 driver_add!(TIMER1, timer::Timer<TIMER1>);
 driver_add!(DMATEST, dma_test::DMATest);
+driver_add!(TMU, tmu::ThreadManagementUnit);
 
 
 struct RiscvCriticalSection;
@@ -111,7 +107,6 @@ unsafe fn crash() {
 }
 
 static LOGGER: UartLogger = UartLogger;
-static TASKMAN: LockedTaskManager = LockedTaskManager::new();
 static SCHEDULER: LockedThreadScheduler = LockedThreadScheduler::new();
 
 #[global_allocator]
@@ -172,68 +167,7 @@ fn putchar(ch: char) {
     }
 }
 
-#[no_mangle]
-#[link_section = ".riscv.trap"]
-pub unsafe extern "C" fn machine_trap() {
-    
-    let mcause = riscv::register::mcause::read();
 
-    match mcause.cause() {
-        riscv::register::mcause::Trap::Exception(e) => {
-            let mhartid = riscv::register::mhartid::read();
-            let mepc = riscv::register::mepc::read();
-            let mtval = riscv::register::mtval::read();
-            let mstatus = riscv::register::mstatus::read();
-
-            let code = mcause.code();
-
-            info!("EXCEPTION {:#?} code={}", e, code);
-            info!("   MEPC: 0x{:08X}", mepc);
-            info!("  MTVAL: 0x{:08X}", mtval);
-            info!(" MCAUSE: 0x{:08X}", mcause.bits());
-            info!("MHARTID: 0x{:08X}", mhartid);
-
-            loop {}
-        }
-
-        riscv::register::mcause::Trap::Interrupt(source) => {
-
-            match source {
-                riscv::register::mcause::Interrupt::MachineExternal => {
-                    // Handle external interrupts from the VexRiscv interrupt controller
-                    let pending = VexRiscvInterrupt::pending() as u32;
-                    //info!("Pending external interrupt: {}\r\n", pending);
-
-                    if pending & (1u32 << litex_pac::Interrupt::UART as u32) != 0 {
-                        UART.access(|d| {
-                            d.handle_interrupt();
-                        });
-                    }
-                    if pending & (1u32 << litex_pac::Interrupt::TIMER0 as u32) != 0 {
-                        TIMER0.access(|d| {
-                            d.handle_interrupt();
-                        });
-                    }
-                    if pending & (1u32 << litex_pac::Interrupt::TIMER1 as u32) != 0 {
-                        TIMER1.access(|d| {
-                            d.handle_interrupt();
-                        });
-                    }
-
-                    if pending & (1u32 << litex_pac::Interrupt::DMATEST as u32) != 0 {
-                        DMATEST.access(|dma| {
-                            dma.interrupt_handler();
-                        })
-                    }
-                }
-
-                _ => {
-                    info!("Unhandled CPU interrupt source: {:#?}", source);
-                }
-            }
-        }
-    }
-}
 
 #[no_mangle]
 extern "C" fn main() {
@@ -259,25 +193,38 @@ extern "C" fn main() {
     info!("Heap initialized");
 
     // Initialize timers
-    let timer0 = timer::Timer::new(peripherals.TIMER0, 1000000);
-    let timer1= timer::Timer::new(peripherals.TIMER1, 3e6 as usize);
+    let timer0 = timer::Timer::new(peripherals.TIMER0, 48e6 as usize);
+    let timer1= timer::Timer::new(peripherals.TIMER1, 48e6 as usize);
     let dma: DMATest = dma_test::DMATest::new(peripherals.DMATEST);
+    let tmu = tmu::ThreadManagementUnit::new(peripherals.TMU);
+
+    tmu.enable();
 
     // Set the driver instances. From this point on, all drivers are accessed using:
     // DEVICE.access(|driver| { driver.method() })
     TIMER0.set(timer0);
     TIMER1.set(timer1);
     DMATEST.set(dma);
+    TMU.set(tmu);
+
+    info!("Peripherals initialized");
 
     // Enable interrupts
     unsafe {
+        let mut mask: usize = 0;
+        mask |= (1usize << litex_pac::Interrupt::UART as usize);
+        mask |= (1usize << litex_pac::Interrupt::TIMER0 as usize);
+        mask |= (1usize << litex_pac::Interrupt::TIMER1 as usize);
+        mask |= (1usize << litex_pac::Interrupt::DMATEST as usize);
+        mask |= (1usize << litex_pac::Interrupt::TMU as usize);
+        VexRiscvInterrupt::write_mask(mask);
+
         // Enable external interrupts from the VexRiscv interrupt controller
         riscv::register::mie::set_mext();
 
         // Enable global interrupts
         riscv::interrupt::enable();
 
-        VexRiscvInterrupt::write_mask(usize::MAX);
     }
 
     info!("Interrupts enabled");
@@ -337,6 +284,7 @@ fn thread_test() {
     TIMER0.access(|t| {
         t.set_callback(|| {
             // Timer callback..
+            log::info!("Tick");
         })
     });
 

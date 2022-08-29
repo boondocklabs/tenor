@@ -5,6 +5,8 @@ pub mod scheduler;
 pub mod context;
 pub mod info;
 
+use crate::DriverAccess;
+
 use core::{cell::RefCell, borrow::BorrowMut};
 
 use critical_section::Mutex;
@@ -155,7 +157,13 @@ pub fn set_current(id: ThreadId) {
 pub fn thread_add(thread: Thread) -> ThreadId
 {
     let id = thread.id.clone();
- 
+
+    let ptr = &thread as *const _ as u32;
+
+    super::TMU.access(|tmu| {
+        tmu.add_thread(id.as_u64() as u32, ptr)
+    });
+
     critical_section::with(|cs| {
         let mut thread_map = THREADS.borrow_ref_mut(cs);
         thread_map.borrow_mut().insert(thread.id, Arc::new(thread));

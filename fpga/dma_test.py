@@ -19,7 +19,6 @@ class DMATest(Module, AutoCSR):
 
         self.submodules.ev = EventManager()
         self.ev.done = EventSourceProcess(edge="rising")
-        self.ev.test = EventSourceLevel()
         self.ev.finalize()
 
 
@@ -69,7 +68,6 @@ class DMATest(Module, AutoCSR):
         self.comb += self.offset.status.eq(offset)
 
         self.comb += self.ev.done.trigger.eq(0)
-        self.comb += self.ev.test.trigger.eq(0)
 
         fsm.act("IDLE",
             NextValue(offset, 0),

@@ -30,6 +30,7 @@ extern "C" {
     fn TIMER0();
     fn TIMER1();
     fn DMATEST();
+    fn TMU();
 }
 #[doc(hidden)]
 pub union Vector {
@@ -39,11 +40,12 @@ pub union Vector {
 #[cfg(feature = "rt")]
 #[doc(hidden)]
 #[no_mangle]
-pub static __EXTERNAL_INTERRUPTS: [Vector; 4] = [
+pub static __EXTERNAL_INTERRUPTS: [Vector; 5] = [
     Vector { _handler: UART },
     Vector { _handler: TIMER0 },
     Vector { _handler: TIMER1 },
     Vector { _handler: DMATEST },
+    Vector { _handler: TMU },
 ];
 #[doc(hidden)]
 pub mod interrupt;
@@ -216,6 +218,34 @@ impl core::fmt::Debug for TIMER1 {
 }
 #[doc = "TIMER1"]
 pub mod timer1;
+#[doc = "TMU"]
+pub struct TMU {
+    _marker: PhantomData<*const ()>,
+}
+unsafe impl Send for TMU {}
+impl TMU {
+    #[doc = r"Pointer to the register block"]
+    pub const PTR: *const tmu::RegisterBlock = 0xf000_3000 as *const _;
+    #[doc = r"Return the pointer to the register block"]
+    #[inline(always)]
+    pub const fn ptr() -> *const tmu::RegisterBlock {
+        Self::PTR
+    }
+}
+impl Deref for TMU {
+    type Target = tmu::RegisterBlock;
+    #[inline(always)]
+    fn deref(&self) -> &Self::Target {
+        unsafe { &*Self::PTR }
+    }
+}
+impl core::fmt::Debug for TMU {
+    fn fmt(&self, f: &mut core::fmt::Formatter) -> core::fmt::Result {
+        f.debug_struct("TMU").finish()
+    }
+}
+#[doc = "TMU"]
+pub mod tmu;
 #[doc = "UART"]
 pub struct UART {
     _marker: PhantomData<*const ()>,
@@ -223,7 +253,7 @@ pub struct UART {
 unsafe impl Send for UART {}
 impl UART {
     #[doc = r"Pointer to the register block"]
-    pub const PTR: *const uart::RegisterBlock = 0xf000_3000 as *const _;
+    pub const PTR: *const uart::RegisterBlock = 0xf000_3800 as *const _;
     #[doc = r"Return the pointer to the register block"]
     #[inline(always)]
     pub const fn ptr() -> *const uart::RegisterBlock {
@@ -261,6 +291,8 @@ pub struct Peripherals {
     pub TIMER0: TIMER0,
     #[doc = "TIMER1"]
     pub TIMER1: TIMER1,
+    #[doc = "TMU"]
+    pub TMU: TMU,
     #[doc = "UART"]
     pub UART: UART,
 }
@@ -297,6 +329,9 @@ impl Peripherals {
                 _marker: PhantomData,
             },
             TIMER1: TIMER1 {
+                _marker: PhantomData,
+            },
+            TMU: TMU {
                 _marker: PhantomData,
             },
             UART: UART {

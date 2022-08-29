@@ -10,6 +10,8 @@ pub enum Interrupt {
     TIMER1 = 2,
     #[doc = "3 - dmatest"]
     DMATEST = 3,
+    #[doc = "4 - tmu"]
+    TMU = 4,
 }
 #[doc = r" TryFromInterruptError"]
 #[derive(Debug, Copy, Clone)]
@@ -23,6 +25,7 @@ impl Interrupt {
             1 => Ok(Interrupt::TIMER0),
             2 => Ok(Interrupt::TIMER1),
             3 => Ok(Interrupt::DMATEST),
+            4 => Ok(Interrupt::TMU),
             _ => Err(TryFromInterruptError(())),
         }
     }

@@ -1,11 +1,11 @@
 #[doc = r"Register block"]
 #[repr(C)]
 pub struct RegisterBlock {
-    #[doc = "0x00 - This register contains the current raw level of the test event trigger. Writes to this register have no effect."]
+    #[doc = "0x00 - This register contains the current raw level of the done event trigger. Writes to this register have no effect."]
     pub ev_status: EV_STATUS,
-    #[doc = "0x04 - When a test event occurs, the corresponding bit will be set in this register. To clear the Event, set the corresponding bit in this register."]
+    #[doc = "0x04 - When a done event occurs, the corresponding bit will be set in this register. To clear the Event, set the corresponding bit in this register."]
     pub ev_pending: EV_PENDING,
-    #[doc = "0x08 - This register enables the corresponding test events. Write a ``0`` to this register to disable individual events."]
+    #[doc = "0x08 - This register enables the corresponding done events. Write a ``0`` to this register to disable individual events."]
     pub ev_enable: EV_ENABLE,
     #[doc = "0x0c - DMA Status"]
     pub status: STATUS,
@@ -24,15 +24,15 @@ pub struct RegisterBlock {
 }
 #[doc = "EV_STATUS (rw) register accessor: an alias for `Reg<EV_STATUS_SPEC>`"]
 pub type EV_STATUS = crate::Reg<ev_status::EV_STATUS_SPEC>;
-#[doc = "This register contains the current raw level of the test event trigger. Writes to this register have no effect."]
+#[doc = "This register contains the current raw level of the done event trigger. Writes to this register have no effect."]
 pub mod ev_status;
 #[doc = "EV_PENDING (rw) register accessor: an alias for `Reg<EV_PENDING_SPEC>`"]
 pub type EV_PENDING = crate::Reg<ev_pending::EV_PENDING_SPEC>;
-#[doc = "When a test event occurs, the corresponding bit will be set in this register. To clear the Event, set the corresponding bit in this register."]
+#[doc = "When a done event occurs, the corresponding bit will be set in this register. To clear the Event, set the corresponding bit in this register."]
 pub mod ev_pending;
 #[doc = "EV_ENABLE (rw) register accessor: an alias for `Reg<EV_ENABLE_SPEC>`"]
 pub type EV_ENABLE = crate::Reg<ev_enable::EV_ENABLE_SPEC>;
-#[doc = "This register enables the corresponding test events. Write a ``0`` to this register to disable individual events."]
+#[doc = "This register enables the corresponding done events. Write a ``0`` to this register to disable individual events."]
 pub mod ev_enable;
 #[doc = "STATUS (rw) register accessor: an alias for `Reg<STATUS_SPEC>`"]
 pub type STATUS = crate::Reg<status::STATUS_SPEC>;

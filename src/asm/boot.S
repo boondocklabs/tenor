@@ -13,7 +13,7 @@ _start:
 runtime_init:
 
 	// Write to UART (address depends on SoC config)
-	//li t0, 0xF0003000
+	//li t0, 0xF0003800
 	//li t1, 0x41
 	//sb t1, 0(t0)
 
