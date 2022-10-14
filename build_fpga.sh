@@ -1,3 +1,9 @@
 #!/bin/sh
+set -e
 
-./fpga/orangecrab.py --cpu-variant imac --csr-svd litex-pac/svd/soc.svd --build
+./fpga/eucalyptus.py --cpu-variant imac --csr-svd litex-pac/svd/soc.svd --build
+
+cd litex-pac
+./update.sh
+cd ..
+

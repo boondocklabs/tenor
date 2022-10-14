@@ -40,6 +40,7 @@ class ThreadManagementUnit(Module, AutoCSR):
         self.switch_source = CSRStatus(32, description = "TMU Switch Source");
         self.switch_dest = CSRStatus(32, description = "TMU Switch Destination");
 
+        self.current_thread = CSRStatus(32, description = "Current thread")
 
         # BROKEN in LiteX
         #self.switch = CSRStatus(64, description = "TMU Switch Status", fields=[
@@ -102,7 +103,7 @@ class ThreadManagementUnit(Module, AutoCSR):
             cmd_read_port.re.eq(1),
             If(cmd_read_port.dat_r == 0,
                 cmd_write_port.we.eq(1),
-                cmd_write_port.dat_w.eq(Cat(1, self.cmd_context_pointer.storage)),
+                cmd_write_port.dat_w.eq(self.cmd_context_pointer.storage),
                 NextState("COMMAND_ACK")
             ).Else(
                 cmd_read_port.re.eq(1),
@@ -123,6 +124,9 @@ class ThreadManagementUnit(Module, AutoCSR):
         sched_read_port = slot.get_port(has_re = True, async_read=True)
         self.specials += sched_read_port
 
+        sched_read_port2 = slot.get_port(has_re = False, async_read=True)
+        self.specials += sched_read_port2
+
         fsm = FSM(reset_state="IDLE")
         fsm: FSM = ResetInserter()(fsm)
         self.submodules += fsm
@@ -131,25 +135,53 @@ class ThreadManagementUnit(Module, AutoCSR):
         self.comb += fsm.reset.eq(self.control.fields.reset)
 
 
+        # When this counter wraps, the scheduler will switch to the next thread
+        counter = Signal(19)
+
         # Make counter wrap at num slots (log2(num_slots))
-        counter = Signal(log2_int(self.num_slots))
+        current_thread = Signal(log2_int(self.num_slots))
+        next_thread = Signal(log2_int(self.num_slots))
+
+        self.comb += sched_read_port.adr.eq(next_thread)
+        self.comb += sched_read_port2.adr.eq(current_thread)
+
+        #self.comb += self.switch_source.status.eq(current_thread)
+        #self.comb += self.switch_dest.status.eq(next_thread)
+
+        self.comb += self.switch_dest.status.eq(sched_read_port.dat_r)
+        self.comb += self.switch_source.status.eq(sched_read_port2.dat_r)
 
         fsm.act("IDLE",
-            NextValue(counter, 0),
+            NextValue(counter, 1),
             NextState("RUN"),
-            self.ev.switch.trigger.eq(0)
         )
 
         fsm.act("RUN",
             NextValue(counter, counter + 1),
 
-            # Check if there is an entry in this slot
-            #If(slot[counter] & (1<<32),
-            #    self.ev.switch.trigger.eq(1),
-            #)
+            If(counter == 0,
+                NextValue(current_thread, next_thread),
+                NextValue(next_thread, next_thread + 1),
+                sched_read_port.re.eq(1),
+                NextState("NEXT-SLOT")
+            )
+        )
 
-            #If(counter == 0,
-                #self.ev.switch.trigger.eq(1),
-                #NextState("IDLE")
-            #)
+        fsm.act("NEXT-SLOT",
+            If(sched_read_port.dat_r != 0,
+                NextState("SWITCH"),
+            ).Else(
+                NextValue(next_thread, next_thread + 1),
+            )
+        )
+
+        fsm.act("SWITCH",
+            self.ev.switch.trigger.eq(1),
+            NextState("WAIT-SWITCH") 
+        )
+
+        fsm.act("WAIT-SWITCH",
+            If(self.ev.switch.pending == 0,
+                NextState("IDLE")
+            )
         )

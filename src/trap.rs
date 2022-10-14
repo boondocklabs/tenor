@@ -7,7 +7,17 @@ use super::DriverAccess;
 
 #[no_mangle]
 #[link_section = ".riscv.trap"]
-pub unsafe extern "C" fn machine_trap() {
+pub unsafe extern "C" fn machine_trap(trap_frame: *const usize) {
+
+    let peripherals = litex_pac::Peripherals::steal();
+
+    let leds = peripherals.LEDS;
+
+    //log::info!("TRAP FRAME {:p}", trap_frame);
+
+    leds.out.write(|w| {
+        unsafe { w.bits(2) }
+    });
     
     let mcause = riscv::register::mcause::read();
 
@@ -72,4 +82,8 @@ pub unsafe extern "C" fn machine_trap() {
             }
         }
     }
+
+    leds.out.write(|w| {
+        unsafe { w.bits(0) }
+    });
 }

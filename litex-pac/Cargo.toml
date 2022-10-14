@@ -5,6 +5,10 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[features]
+critical-section = []
+
 [dependencies]
+critical-section = "1.1.1"
 riscv = "0.8.0"
 vcell = "0.1.3"

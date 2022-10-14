@@ -3,9 +3,8 @@ use alloc::{vec::Vec};
 
 extern crate spinning_top;
 use spinning_top::{Spinlock, lock_api::MutexGuard, RawSpinlock};
-use alloc::sync::Arc;
 
-use super::{Thread, context::ThreadContext};
+use super::{Thread};
 
 pub struct ThreadScheduler {
     pending: Vec<Thread>,

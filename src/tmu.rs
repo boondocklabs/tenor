@@ -69,8 +69,17 @@ impl ThreadManagementUnit {
     pub fn interrupt_handler(&self) {
 
         let pending = self.tmu.ev_pending.read().bits();
+        let source = self.tmu.switch_source.read().bits();
+        let dest = self.tmu.switch_dest.read().bits();
 
-        info!("TMU interrupt handler. Events: {:#b}", pending);
+        unsafe {
+            let t1 = &*(source as *const crate::thread::Thread);
+            let t2 = &*(dest as *const crate::thread::Thread);
+
+            info!("t1 {} t2 {}", t1.id.as_u64(), t2.id.as_u64());
+        }
+
+        info!("TMU IRQ Events: {:#b} Source: {:#010X} Dest: {:#010X}", pending, source, dest);
 
         unsafe {
             self.tmu.ev_pending.write(|wr| {

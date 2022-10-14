@@ -59,7 +59,7 @@ impl W {
         self
     }
 }
-#[doc = "8 x 37-bit memory\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [identifier_mem](index.html) module"]
+#[doc = "8 x 44-bit memory\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [identifier_mem](index.html) module"]
 pub struct IDENTIFIER_MEM_SPEC;
 impl crate::RegisterSpec for IDENTIFIER_MEM_SPEC {
     type Ux = u32;

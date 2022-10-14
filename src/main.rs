@@ -175,10 +175,20 @@ extern "C" fn main() {
 
     let banner = include_str!("banner.txt");
 
+    let leds = peripherals.LEDS;
+    leds.out.write(|w| {
+        unsafe { w.bits(1) }
+    });
+
     // Initialize the UART
     let mut uart = uart::Uart::new(peripherals.UART);
     write!(uart, "{}\r\n", banner.fg(blue_magenta())).unwrap();
     write!(uart, "{}", "Rust RISCV Kernel Booting\r\n".fg(cyan_blue())).unwrap();
+
+    leds.out.write(|w| {
+        unsafe { w.bits(0x8) }
+    });
+
     UART.set(uart);
 
     unsafe {

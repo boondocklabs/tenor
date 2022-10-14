@@ -22,7 +22,12 @@ trap_entry:
   sw x30, -15*4(sp)
   sw x31, -16*4(sp)
   addi sp,sp,-16*4
+
+  // Pass the trap frame pointer to the Rust trap handler
+  // so we can use it for context switching
+  move a0, sp
   call machine_trap
+
   lw x1 , 15*4(sp)
   lw x5,  14*4(sp)
   lw x6,  13*4(sp)
@@ -42,7 +47,6 @@ trap_entry:
   addi sp,sp,16*4
   mret
   .text
-
 
 
 .section .riscv.trap

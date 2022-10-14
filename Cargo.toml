@@ -13,7 +13,7 @@ hashbrown = "0.12.3"
 lazy_static = { version = "1.4.0", features = ["spin_no_std"] }
 linked_list_allocator = "0.10.1"
 #linked_list_allocator = "0.10.1"
-litex-pac = { version = "0.1.0", path = "./litex-pac" }
+litex-pac = { version = "0.1.0", path = "./litex-pac", features = ["critical-section"] }
 log = "0.4.17"
 memoffset = { version = "0.6.5", features = ["unstable_const"] }
 #numtoa = "0.2.4"

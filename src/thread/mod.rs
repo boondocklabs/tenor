@@ -52,7 +52,7 @@ impl ThreadId {
         })
     }
 
-    fn as_u64(&self) -> u64 {
+    pub fn as_u64(&self) -> u64 {
         self.0
     }
 }
@@ -158,15 +158,18 @@ pub fn thread_add(thread: Thread) -> ThreadId
 {
     let id = thread.id.clone();
 
-    let ptr = &thread as *const _ as u32;
+    let thread_arc = Arc::new(thread);
+
+    //let ptr = thread_arc.clone().as_ref() as *const _ as u32;
+    let ptr = Arc::into_raw(thread_arc.clone());
 
     super::TMU.access(|tmu| {
-        tmu.add_thread(id.as_u64() as u32, ptr)
+        tmu.add_thread(id.as_u64() as u32, ptr as u32)
     });
 
     critical_section::with(|cs| {
         let mut thread_map = THREADS.borrow_ref_mut(cs);
-        thread_map.borrow_mut().insert(thread.id, Arc::new(thread));
+        thread_map.borrow_mut().insert(id, thread_arc);
     });
 
     id

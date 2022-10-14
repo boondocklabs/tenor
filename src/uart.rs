@@ -26,12 +26,28 @@ impl Uart {
 
     pub fn write_byte(&mut self, byte: u8) {
         while self.uart.txfull.read().txfull() == true {
-            unsafe { riscv::asm::wfi() };
+            // NOTE: This hangs.. possibly if interrupts are not enabled yet?
+            //unsafe { riscv::asm::wfi() };
         }
  
         self.uart.rxtx.write(|w| {
             unsafe {w.bits(byte as u32)}
         });
+
+        /*
+        if self.uart.ev_pending.read().tx().bit_is_set() == true {
+            // Handle TX events..
+            self.uart.ev_pending.write(|w| {
+                w.tx().set_bit()
+            });
+        }
+        */
+    }
+
+    pub fn flush_tx(&mut self) {
+        while self.uart.txempty.read().txempty() == false {
+            unsafe { riscv::asm::wfi() };
+        }
     }
 
     pub fn read_byte(&self) -> Result<u8, u8> {
@@ -50,7 +66,7 @@ impl Uart {
     }
 
     pub fn handle_interrupt(&mut self) {
-        //write!(self, "UART pending {:#b}", self.uart.ev_pending.read().bits()).unwrap();
+        write!(self, "UART pending {:#b}", self.uart.ev_pending.read().bits()).unwrap();
 
         if self.uart.ev_pending.read().rx().bit_is_set() == true {
 
@@ -84,6 +100,7 @@ impl Write for Uart {
 		for c in out.bytes() {
 			self.write_byte(c);
 		}
+        //self.flush_tx();
 		Ok(())
 	}
 }
