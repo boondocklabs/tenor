@@ -50,23 +50,23 @@ macro_rules! timer_impl {
         impl TimerPeripheral for $t {
             fn init_periodic(&self, reload: usize) {
                 unsafe {
-                    self.en.write(|w| { w.en().clear_bit() });
-                    self.reload.write(|w| { w.reload().bits(reload as u32) });
-                    self.ev_enable.write(|w| { w.zero().set_bit() });
-                    self.en.write(|w| { w.en().set_bit() });
+                    self.en().write(|w| { w.en().clear_bit() });
+                    self.reload().write(|w| { w.reload().bits(reload as u32) });
+                    self.ev_enable().write(|w| { w.zero().set_bit() });
+                    self.en().write(|w| { w.en().set_bit() });
                 }
             }
 
             fn value(&self) -> u32 {
-                self.update_value.write(|w| {
+                self.update_value().write(|w| {
                     w.update_value().set_bit()
                 });
 
-                return self.value.read().bits()
+                return self.value()
             }
 
             fn clear_pending(&self) {
-                self.ev_pending.write(|w| {
+                self.ev_pending().write(|w| {
                     w.zero().set_bit()
                 });
             }

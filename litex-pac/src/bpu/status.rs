@@ -1,55 +1,23 @@
 #[doc = "Register `STATUS` reader"]
-pub struct R(crate::R<STATUS_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<STATUS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<STATUS_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<STATUS_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<STATUS_SPEC>;
 #[doc = "Register `STATUS` writer"]
-pub struct W(crate::W<STATUS_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<STATUS_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<STATUS_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<STATUS_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<STATUS_SPEC>;
 #[doc = "Field `busy` reader - BPU Busy"]
-pub type BUSY_R = crate::BitReader<bool>;
+pub type BUSY_R = crate::BitReader;
 #[doc = "Field `busy` writer - BPU Busy"]
-pub type BUSY_W<'a, const O: u8> = crate::BitWriter<'a, u32, STATUS_SPEC, bool, O>;
+pub type BUSY_W<'a, REG> = crate::BitWriter<'a, REG>;
 #[doc = "Field `idle` reader - BPU Idle"]
-pub type IDLE_R = crate::BitReader<bool>;
+pub type IDLE_R = crate::BitReader;
 #[doc = "Field `idle` writer - BPU Idle"]
-pub type IDLE_W<'a, const O: u8> = crate::BitWriter<'a, u32, STATUS_SPEC, bool, O>;
+pub type IDLE_W<'a, REG> = crate::BitWriter<'a, REG>;
 #[doc = "Field `running` reader - BPU Running"]
-pub type RUNNING_R = crate::BitReader<bool>;
+pub type RUNNING_R = crate::BitReader;
 #[doc = "Field `running` writer - BPU Running"]
-pub type RUNNING_W<'a, const O: u8> = crate::BitWriter<'a, u32, STATUS_SPEC, bool, O>;
+pub type RUNNING_W<'a, REG> = crate::BitWriter<'a, REG>;
 #[doc = "Field `done` reader - BPU Done"]
-pub type DONE_R = crate::BitReader<bool>;
+pub type DONE_R = crate::BitReader;
 #[doc = "Field `done` writer - BPU Done"]
-pub type DONE_W<'a, const O: u8> = crate::BitWriter<'a, u32, STATUS_SPEC, bool, O>;
+pub type DONE_W<'a, REG> = crate::BitWriter<'a, REG>;
 impl R {
     #[doc = "Bit 0 - BPU Busy"]
     #[inline(always)]
@@ -75,48 +43,52 @@ impl R {
 impl W {
     #[doc = "Bit 0 - BPU Busy"]
     #[inline(always)]
-    pub fn busy(&mut self) -> BUSY_W<0> {
-        BUSY_W::new(self)
+    #[must_use]
+    pub fn busy(&mut self) -> BUSY_W<STATUS_SPEC> {
+        BUSY_W::new(self, 0)
     }
     #[doc = "Bit 1 - BPU Idle"]
     #[inline(always)]
-    pub fn idle(&mut self) -> IDLE_W<1> {
-        IDLE_W::new(self)
+    #[must_use]
+    pub fn idle(&mut self) -> IDLE_W<STATUS_SPEC> {
+        IDLE_W::new(self, 1)
     }
     #[doc = "Bit 2 - BPU Running"]
     #[inline(always)]
-    pub fn running(&mut self) -> RUNNING_W<2> {
-        RUNNING_W::new(self)
+    #[must_use]
+    pub fn running(&mut self) -> RUNNING_W<STATUS_SPEC> {
+        RUNNING_W::new(self, 2)
     }
     #[doc = "Bit 3 - BPU Done"]
     #[inline(always)]
-    pub fn done(&mut self) -> DONE_W<3> {
-        DONE_W::new(self)
+    #[must_use]
+    pub fn done(&mut self) -> DONE_W<STATUS_SPEC> {
+        DONE_W::new(self, 3)
     }
-    #[doc = "Writes raw bits to the register."]
+    #[doc = r" Writes raw bits to the register."]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Passing incorrect value can cause undefined behaviour. See reference manual"]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "BPU Status\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [status](index.html) module"]
+#[doc = "BPU Status\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`status::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`status::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct STATUS_SPEC;
 impl crate::RegisterSpec for STATUS_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [status::R](R) reader structure"]
-impl crate::Readable for STATUS_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [status::W](W) writer structure"]
+#[doc = "`read()` method returns [`status::R`](R) reader structure"]
+impl crate::Readable for STATUS_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`status::W`](W) writer structure"]
 impl crate::Writable for STATUS_SPEC {
-    type Writer = W;
+    const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
+    const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }
 #[doc = "`reset()` method sets STATUS to value 0"]
 impl crate::Resettable for STATUS_SPEC {
-    #[inline(always)]
-    fn reset_value() -> Self::Ux {
-        0
-    }
+    const RESET_VALUE: Self::Ux = 0;
 }

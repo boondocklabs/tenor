@@ -2,7 +2,7 @@
 #![no_main]
 
 #![feature(alloc_error_handler)]
-#![feature(box_syntax)]
+//#![feature(box_syntax)]
 
 // This allows us to use LLVM intrinsics to get
 // the return address of a Rust function for
@@ -38,6 +38,7 @@ mod task;
 mod thread;
 mod tmu;
 
+use alloc::boxed::Box;
 use driver::{DriverAccess};
 use thread::ThreadId;
 use thread::scheduler::LockedThreadScheduler;
@@ -175,19 +176,23 @@ extern "C" fn main() {
 
     let banner = include_str!("banner.txt");
 
+    /*
     let leds = peripherals.LEDS;
     leds.out.write(|w| {
         unsafe { w.bits(1) }
     });
+    */
 
     // Initialize the UART
     let mut uart = uart::Uart::new(peripherals.UART);
     write!(uart, "{}\r\n", banner.fg(blue_magenta())).unwrap();
     write!(uart, "{}", "Rust RISCV Kernel Booting\r\n".fg(cyan_blue())).unwrap();
 
+    /*
     leds.out.write(|w| {
         unsafe { w.bits(0x8) }
     });
+    */
 
     UART.set(uart);
 
@@ -259,8 +264,8 @@ extern "C" fn main() {
 fn dmatest() {
 
     const NUM: usize = (256*1024);
-    let mut data = box [0 as u8; NUM];
-    let mut dest = box [0 as u8; NUM];
+    let mut data = Box::new([0 as u8; NUM]);
+    let mut dest = Box::new([0 as u8; NUM]);
 
     info!("Starting DMA test {:p} -> {:p}", data, dest);
 

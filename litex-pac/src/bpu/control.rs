@@ -1,47 +1,15 @@
 #[doc = "Register `CONTROL` reader"]
-pub struct R(crate::R<CONTROL_SPEC>);
-impl core::ops::Deref for R {
-    type Target = crate::R<CONTROL_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl From<crate::R<CONTROL_SPEC>> for R {
-    #[inline(always)]
-    fn from(reader: crate::R<CONTROL_SPEC>) -> Self {
-        R(reader)
-    }
-}
+pub type R = crate::R<CONTROL_SPEC>;
 #[doc = "Register `CONTROL` writer"]
-pub struct W(crate::W<CONTROL_SPEC>);
-impl core::ops::Deref for W {
-    type Target = crate::W<CONTROL_SPEC>;
-    #[inline(always)]
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-impl core::ops::DerefMut for W {
-    #[inline(always)]
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
-    }
-}
-impl From<crate::W<CONTROL_SPEC>> for W {
-    #[inline(always)]
-    fn from(writer: crate::W<CONTROL_SPEC>) -> Self {
-        W(writer)
-    }
-}
+pub type W = crate::W<CONTROL_SPEC>;
 #[doc = "Field `enable` reader - Enable BPU"]
-pub type ENABLE_R = crate::BitReader<bool>;
+pub type ENABLE_R = crate::BitReader;
 #[doc = "Field `enable` writer - Enable BPU"]
-pub type ENABLE_W<'a, const O: u8> = crate::BitWriter<'a, u32, CONTROL_SPEC, bool, O>;
+pub type ENABLE_W<'a, REG> = crate::BitWriter<'a, REG>;
 #[doc = "Field `reset` reader - Reset BPU"]
-pub type RESET_R = crate::BitReader<bool>;
+pub type RESET_R = crate::BitReader;
 #[doc = "Field `reset` writer - Reset BPU"]
-pub type RESET_W<'a, const O: u8> = crate::BitWriter<'a, u32, CONTROL_SPEC, bool, O>;
+pub type RESET_W<'a, REG> = crate::BitWriter<'a, REG>;
 impl R {
     #[doc = "Bit 0 - Enable BPU"]
     #[inline(always)]
@@ -57,38 +25,40 @@ impl R {
 impl W {
     #[doc = "Bit 0 - Enable BPU"]
     #[inline(always)]
-    pub fn enable(&mut self) -> ENABLE_W<0> {
-        ENABLE_W::new(self)
+    #[must_use]
+    pub fn enable(&mut self) -> ENABLE_W<CONTROL_SPEC> {
+        ENABLE_W::new(self, 0)
     }
     #[doc = "Bit 1 - Reset BPU"]
     #[inline(always)]
-    pub fn reset(&mut self) -> RESET_W<1> {
-        RESET_W::new(self)
+    #[must_use]
+    pub fn reset(&mut self) -> RESET_W<CONTROL_SPEC> {
+        RESET_W::new(self, 1)
     }
-    #[doc = "Writes raw bits to the register."]
+    #[doc = r" Writes raw bits to the register."]
+    #[doc = r""]
+    #[doc = r" # Safety"]
+    #[doc = r""]
+    #[doc = r" Passing incorrect value can cause undefined behaviour. See reference manual"]
     #[inline(always)]
     pub unsafe fn bits(&mut self, bits: u32) -> &mut Self {
-        self.0.bits(bits);
+        self.bits = bits;
         self
     }
 }
-#[doc = "\n\nThis register you can [`read`](crate::generic::Reg::read), [`write_with_zero`](crate::generic::Reg::write_with_zero), [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`modify`](crate::generic::Reg::modify). See [API](https://docs.rs/svd2rust/#read--modify--write-api).\n\nFor information about available fields see [control](index.html) module"]
+#[doc = "\n\nYou can [`read`](crate::generic::Reg::read) this register and get [`control::R`](R).  You can [`reset`](crate::generic::Reg::reset), [`write`](crate::generic::Reg::write), [`write_with_zero`](crate::generic::Reg::write_with_zero) this register using [`control::W`](W). You can also [`modify`](crate::generic::Reg::modify) this register. See [API](https://docs.rs/svd2rust/#read--modify--write-api)."]
 pub struct CONTROL_SPEC;
 impl crate::RegisterSpec for CONTROL_SPEC {
     type Ux = u32;
 }
-#[doc = "`read()` method returns [control::R](R) reader structure"]
-impl crate::Readable for CONTROL_SPEC {
-    type Reader = R;
-}
-#[doc = "`write(|w| ..)` method takes [control::W](W) writer structure"]
+#[doc = "`read()` method returns [`control::R`](R) reader structure"]
+impl crate::Readable for CONTROL_SPEC {}
+#[doc = "`write(|w| ..)` method takes [`control::W`](W) writer structure"]
 impl crate::Writable for CONTROL_SPEC {
-    type Writer = W;
+    const ZERO_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
+    const ONE_TO_MODIFY_FIELDS_BITMAP: Self::Ux = 0;
 }
 #[doc = "`reset()` method sets CONTROL to value 0"]
 impl crate::Resettable for CONTROL_SPEC {
-    #[inline(always)]
-    fn reset_value() -> Self::Ux {
-        0
-    }
+    const RESET_VALUE: Self::Ux = 0;
 }

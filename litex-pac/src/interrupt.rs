@@ -8,14 +8,10 @@ pub enum Interrupt {
     TIMER0 = 1,
     #[doc = "2 - timer1"]
     TIMER1 = 2,
-    #[doc = "3 - ethmac"]
-    ETHMAC = 3,
-    #[doc = "4 - dmatest"]
-    DMATEST = 4,
-    #[doc = "5 - tmu"]
-    TMU = 5,
-    #[doc = "6 - sdirq"]
-    SDIRQ = 6,
+    #[doc = "3 - dmatest"]
+    DMATEST = 3,
+    #[doc = "4 - tmu"]
+    TMU = 4,
 }
 #[doc = r" TryFromInterruptError"]
 #[derive(Debug, Copy, Clone)]
@@ -28,10 +24,8 @@ impl Interrupt {
             0 => Ok(Interrupt::UART),
             1 => Ok(Interrupt::TIMER0),
             2 => Ok(Interrupt::TIMER1),
-            3 => Ok(Interrupt::ETHMAC),
-            4 => Ok(Interrupt::DMATEST),
-            5 => Ok(Interrupt::TMU),
-            6 => Ok(Interrupt::SDIRQ),
+            3 => Ok(Interrupt::DMATEST),
+            4 => Ok(Interrupt::TMU),
             _ => Err(TryFromInterruptError(())),
         }
     }

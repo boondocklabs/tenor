@@ -16,7 +16,7 @@ impl Uart {
         })
         */
 
-        uart.ev_enable.write(|w| {
+        uart.ev_enable().write(|w| {
             w.tx().clear_bit();
             w.rx().set_bit()
         });
@@ -25,12 +25,12 @@ impl Uart {
     }
 
     pub fn write_byte(&mut self, byte: u8) {
-        while self.uart.txfull.read().txfull() == true {
+        while self.uart.txfull().read().txfull() == true {
             // NOTE: This hangs.. possibly if interrupts are not enabled yet?
             //unsafe { riscv::asm::wfi() };
         }
  
-        self.uart.rxtx.write(|w| {
+        self.uart.rxtx().write(|w| {
             unsafe {w.bits(byte as u32)}
         });
 
@@ -45,16 +45,16 @@ impl Uart {
     }
 
     pub fn flush_tx(&mut self) {
-        while self.uart.txempty.read().txempty() == false {
+        while self.uart.txempty().read().txempty() == false {
             unsafe { riscv::asm::wfi() };
         }
     }
 
     pub fn read_byte(&self) -> Result<u8, u8> {
-        if self.uart.rxempty.read().rxempty() == false {
-            let byte = self.uart.rxtx.read().rxtx().bits();
+        if self.uart.rxempty().read().rxempty() == false {
+            let byte = self.uart.rxtx().read().rxtx().bits();
             
-            self.uart.ev_pending.write(|w| {
+            self.uart.ev_pending().write(|w| {
                 w.rx().set_bit()
             });
 
@@ -66,11 +66,11 @@ impl Uart {
     }
 
     pub fn handle_interrupt(&mut self) {
-        write!(self, "UART pending {:#b}", self.uart.ev_pending.read().bits()).unwrap();
+        write!(self, "UART pending {:#b}", self.uart.ev_pending().read().bits()).unwrap();
 
-        if self.uart.ev_pending.read().rx().bit_is_set() == true {
+        if self.uart.ev_pending().read().rx().bit_is_set() == true {
 
-            while self.uart.rxempty.read().rxempty() == false {
+            while self.uart.rxempty().read().rxempty() == false {
                 match self.read_byte() {
                     Ok(rx) => {
                         self.write_byte(rx);
@@ -81,14 +81,14 @@ impl Uart {
                 }
             }
 
-            self.uart.ev_pending.write(|w| {
+            self.uart.ev_pending().write(|w| {
                 w.rx().set_bit()
             });
         }
 
-        if self.uart.ev_pending.read().tx().bit_is_set() == true {
+        if self.uart.ev_pending().read().tx().bit_is_set() == true {
             // Handle TX events..
-            self.uart.ev_pending.write(|w| {
+            self.uart.ev_pending().write(|w| {
                 w.tx().set_bit()
             });
         }

@@ -11,6 +11,7 @@ pub unsafe extern "C" fn machine_trap(trap_frame: *const usize) {
 
     let peripherals = litex_pac::Peripherals::steal();
 
+    /*
     let leds = peripherals.LEDS;
 
     //log::info!("TRAP FRAME {:p}", trap_frame);
@@ -18,6 +19,7 @@ pub unsafe extern "C" fn machine_trap(trap_frame: *const usize) {
     leds.out.write(|w| {
         unsafe { w.bits(2) }
     });
+    */
     
     let mcause = riscv::register::mcause::read();
 
@@ -83,7 +85,9 @@ pub unsafe extern "C" fn machine_trap(trap_frame: *const usize) {
         }
     }
 
+    /*
     leds.out.write(|w| {
         unsafe { w.bits(0) }
     });
+    */
 }
